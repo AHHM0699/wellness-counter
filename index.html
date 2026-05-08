@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080f08">
+<title>Mist Journal</title>
+<style>
+:root {
+  --bg:       #080f08;
+  --bg2:      #0e1a0e;
+  --card:     #121e12;
+  --border:   #1e3d1e;
+  --green:    #76ff03;
+  --green2:   #4caf50;
+  --purple:   #ab47bc;
+  --gold:     #ffd54f;
+  --red:      #ef5350;
+  --orange:   #ff9800;
+  --txt:      #e8f5e9;
+  --txt2:     #a5d6a7;
+  --muted:    #558b5a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  max-width:440px;
+  margin:0 auto;
+  padding-bottom:110px;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── HEADER ── */
+.hdr{
+  background:linear-gradient(160deg,#0b1f0b,#152815);
+  padding:18px 16px 14px;
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--border);
+}
+.hdr-row{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:8px}
+.leaf{font-size:22px;display:inline-block;animation:sway 3s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.app-name{font-size:17px;font-weight:800;color:var(--green);text-shadow:0 0 12px rgba(118,255,3,.35);letter-spacing:.5px}
+.clock{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{
+  padding:14px 16px 6px;
+  font-size:11px;font-weight:700;
+  color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;
+}
+
+/* ── TODAY STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px 4px}
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 8px;text-align:center;
+}
+.stat-v{font-size:30px;font-weight:900;color:var(--green);line-height:1}
+.stat-l{font-size:10px;color:var(--txt2);margin-top:5px;text-transform:uppercase;letter-spacing:.8px}
+
+/* ── LAST HIT CARD ── */
+.lhit{
+  margin:12px 16px;
+  background:linear-gradient(135deg,#0e2210,#163320);
+  border:1px solid var(--green2);
+  border-radius:18px;padding:16px;
+}
+.lhit-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+.lhit-time{font-size:26px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums}
+.lhit-msg{font-size:13px;color:var(--txt2);margin-top:6px;font-style:italic;line-height:1.4}
+
+/* ── CALENDAR ── */
+.cal-card{
+  margin:4px 16px 12px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:18px;padding:16px;
+}
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-btn{
+  background:none;border:none;color:var(--green2);
+  font-size:22px;cursor:pointer;padding:2px 10px;line-height:1;
+}
+.cal-month{font-size:15px;font-weight:700;color:var(--txt)}
+.wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.wd{text-align:center;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cday{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;font-size:12px;cursor:pointer;
+  position:relative;transition:transform .15s;
+  color:var(--muted);
+}
+.cday:active{transform:scale(.9)}
+.cday.empty{cursor:default;pointer-events:none}
+.cday.today{border:2px solid var(--green);color:var(--green);font-weight:800}
+.cday.d1{background:rgba(76,175,80,.15);color:#a5d6a7}
+.cday.d2{background:rgba(76,175,80,.35);color:#c8e6c9}
+.cday.d3{background:rgba(76,175,80,.6);color:#fff;font-weight:800}
+.cday.d4{background:var(--green2);color:#000;font-weight:900}
+.pdot{
+  position:absolute;bottom:2px;
+  width:3px;height:3px;border-radius:50%;
+  background:var(--green);
+}
+.day-detail{
+  margin-top:14px;padding:12px;
+  background:var(--bg2);border-radius:12px;
+  display:none;font-size:13px;
+}
+.day-detail.on{display:block}
+.dd-row{
+  padding:7px 0;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:4px;
+}
+.dd-row:first-child{border-top:none}
+
+/* ── SESSIONS LIST ── */
+.s-card{
+  margin:4px 16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:18px;padding:14px 16px;
+}
+.s-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.s-item:last-child{border-bottom:none}
+.s-row{display:flex;justify-content:space-between;align-items:center}
+.s-name{font-size:14px;font-weight:700;color:var(--txt2)}
+.s-time-tag{font-size:11px;color:var(--muted)}
+.s-info{font-size:12px;color:var(--muted);margin-top:3px}
+.chips-row{margin-top:6px;line-height:2}
+.chip{
+  display:inline-flex;align-items:center;gap:2px;
+  border-radius:20px;padding:2px 8px;font-size:11px;
+  border:1px solid;margin:2px 2px;
+}
+
+/* ── FAB ── */
+.fab{
+  position:fixed;bottom:26px;right:22px;
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,#4caf50,#1b5e20);
+  border:none;
+  box-shadow:0 4px 24px rgba(76,175,80,.55),0 2px 8px rgba(0,0,0,.5);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;z-index:200;
+  transition:transform .15s,box-shadow .15s;
+}
+.fab:active{transform:scale(.9)}
+.fab.has-session{
+  background:linear-gradient(135deg,#66bb6a,#2e7d32);
+  box-shadow:0 0 0 4px rgba(118,255,3,.25),0 4px 20px rgba(76,175,80,.6);
+  animation:fab-pulse 2s ease-in-out infinite;
+}
+@keyframes fab-pulse{
+  0%,100%{box-shadow:0 0 0 4px rgba(118,255,3,.15),0 4px 20px rgba(76,175,80,.5)}
+  50%{box-shadow:0 0 0 8px rgba(118,255,3,.3),0 4px 30px rgba(76,175,80,.7)}
+}
+
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.88);
+  z-index:300;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;
+  backdrop-filter:blur(6px);
+}
+.overlay.on{opacity:1;pointer-events:all}
+.modal{
+  background:linear-gradient(180deg,#101e10,#0a150a);
+  border:1px solid var(--border);
+  border-radius:28px 28px 0 0;
+  padding:24px 20px 36px;
+  width:100%;max-width:440px;
+  max-height:92vh;overflow-y:auto;
+  transform:translateY(60px);
+  transition:transform .35s cubic-bezier(.25,.8,.25,1);
+}
+.overlay.on .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px}
+.modal-title{text-align:center;font-size:17px;font-weight:800;color:var(--green);margin-bottom:4px}
+.modal-sub{text-align:center;font-size:12px;color:var(--muted);margin-bottom:18px}
+
+/* ── SESSION BADGES ── */
+.badges{display:flex;gap:10px;justify-content:center;margin-bottom:22px}
+.badge{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:10px 16px;text-align:center;min-width:72px;
+}
+.badge .bv{font-size:22px;font-weight:900;color:var(--green)}
+.badge .bl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-top:2px}
+
+/* ── HIT BUTTON ── */
+.hit-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:22px;position:relative}
+.hit-btn{
+  width:210px;height:210px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.15);
+  cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;
+  position:relative;overflow:hidden;
+  transition:background .4s,box-shadow .4s,transform .08s;
+  touch-action:none;
+  background:radial-gradient(circle at 40% 35%, #66bb6a, #1b5e20);
+  box-shadow:0 0 40px rgba(76,175,80,.5),inset 0 2px 6px rgba(255,255,255,.12);
+}
+.hit-btn.pressing{transform:scale(.95)}
+.hit-btn.z-green{
+  background:radial-gradient(circle at 40% 35%, #66bb6a, #2e7d32);
+  box-shadow:0 0 40px rgba(76,175,80,.6),inset 0 2px 6px rgba(255,255,255,.12);
+  animation:glow-g 1.2s ease-in-out infinite;
+}
+.hit-btn.z-orange{
+  background:radial-gradient(circle at 40% 35%, #ffb74d, #e65100);
+  box-shadow:0 0 40px rgba(255,152,0,.65),inset 0 2px 6px rgba(255,255,255,.1);
+  animation:glow-o .9s ease-in-out infinite;
+}
+.hit-btn.z-red{
+  background:radial-gradient(circle at 40% 35%, #ef5350, #7f0000);
+  box-shadow:0 0 50px rgba(239,83,80,.7),inset 0 2px 6px rgba(255,255,255,.08);
+  animation:glow-r .6s ease-in-out infinite;
+}
+@keyframes glow-g{0%,100%{box-shadow:0 0 35px rgba(76,175,80,.5)}50%{box-shadow:0 0 60px rgba(118,255,3,.7)}}
+@keyframes glow-o{0%,100%{box-shadow:0 0 35px rgba(255,152,0,.5)}50%{box-shadow:0 0 60px rgba(255,183,77,.8)}}
+@keyframes glow-r{0%,100%{box-shadow:0 0 40px rgba(239,83,80,.6)}50%{box-shadow:0 0 70px rgba(239,83,80,.9),0 0 120px rgba(239,83,80,.3)}}
+.hit-num{font-size:44px;font-weight:900;color:#fff;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.hit-zone{font-size:12px;color:rgba(255,255,255,.85);margin-top:6px;font-weight:600;letter-spacing:.5px}
+.hit-hint{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
+.vib-warn{
+  position:absolute;bottom:-32px;
+  font-size:13px;color:var(--red);font-weight:700;
+  opacity:0;transition:opacity .3s;text-align:center;
+  text-shadow:0 0 8px var(--red);
+}
+.vib-warn.on{opacity:1}
+.ripple{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.25);
+  animation:rip .65s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes rip{from{transform:scale(0);opacity:1}to{transform:scale(5);opacity:0}}
+
+/* ── HITS CHIPS IN MODAL ── */
+.hits-chips{min-height:32px;margin-bottom:16px;line-height:2}
+.empty-hint{text-align:center;color:var(--muted);font-size:13px;padding:4px 0}
+
+/* ── MODAL BUTTONS ── */
+.modal-btns{display:flex;gap:12px;margin-top:4px}
+.mbtn{
+  flex:1;padding:15px;border-radius:14px;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:opacity .15s,transform .1s;
+}
+.mbtn:active{transform:scale(.97);opacity:.85}
+.mbtn-end{
+  background:linear-gradient(135deg,rgba(171,71,188,.25),rgba(156,39,176,.15));
+  border:1px solid var(--purple);color:#ce93d8;
+}
+.mbtn-min{
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);color:var(--txt2);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── UTILS ── */
+.mt4{margin-top:4px}
+.empty-state{color:var(--muted);text-align:center;font-size:13px;padding:10px 0}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-row">
+    <div class="logo">
+      <span class="leaf">🌿</span>
+      <span class="app-name">Mist Journal</span>
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- TODAY LABEL -->
+<div class="sec-lbl" id="today-lbl">HOY · --</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-v" id="s-ses">0</div><div class="stat-l">Sesiones</div></div>
+  <div class="stat"><div class="stat-v" id="s-hits">0</div><div class="stat-l">Caladas</div></div>
+  <div class="stat"><div class="stat-v" id="s-sec">0s</div><div class="stat-l">Segundos</div></div>
+</div>
+
+<!-- LAST HIT -->
+<div class="lhit">
+  <div class="lhit-label">⏱ Tiempo desde último hit</div>
+  <div class="lhit-time" id="lhit-time">---</div>
+  <div class="lhit-msg" id="lhit-msg">Registra tu primera sesión 🌱</div>
+</div>
+
+<!-- CALENDAR -->
+<div class="sec-lbl">📅 Historial mensual</div>
+<div class="cal-card">
+  <div class="cal-nav">
+    <button class="cal-btn" id="cal-prev">‹</button>
+    <div class="cal-month" id="cal-month">--</div>
+    <button class="cal-btn" id="cal-next">›</button>
+  </div>
+  <div class="wdays">
+    <div class="wd">D</div><div class="wd">L</div><div class="wd">M</div>
+    <div class="wd">X</div><div class="wd">J</div><div class="wd">V</div><div class="wd">S</div>
+  </div>
+  <div class="cgrid" id="cal-grid"></div>
+  <div class="day-detail" id="day-detail"></div>
+</div>
+
+<!-- SESSIONS TODAY -->
+<div class="sec-lbl">🌿 Sesiones de hoy</div>
+<div class="s-card" id="ses-list">
+  <div class="empty-state">Sin sesiones aún...</div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" title="Registrar">💨</button>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🌿 Sesión Activa</div>
+    <div class="modal-sub" id="m-sub">--</div>
+
+    <div class="badges">
+      <div class="badge"><div class="bv" id="m-hits">0</div><div class="bl">Caladas</div></div>
+      <div class="badge"><div class="bv" id="m-sec">0s</div><div class="bl">Segundos</div></div>
+      <div class="badge"><div class="bv" id="m-dur">0m</div><div class="bl">Duración</div></div>
+    </div>
+
+    <div class="hit-wrap">
+      <button class="hit-btn" id="hit-btn" ontouchstart="return false">
+        <div class="hit-num" id="hit-num">💨</div>
+        <div class="hit-zone" id="hit-zone">Mantén para vapear</div>
+        <div class="hit-hint" id="hit-hint"></div>
+      </button>
+      <div class="vib-warn" id="vib-warn">⚠️ ¡10 segundos! Suelta ya.</div>
+    </div>
+
+    <div class="hits-chips" id="hits-chips">
+      <div class="empty-hint">Presiona el botón para registrar una calada 💨</div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="mbtn mbtn-end" id="btn-end">✅ Cerrar sesión</button>
+      <button class="mbtn mbtn-min" id="btn-min">Minimizar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =============================================
+   CONSTANTS & CONFIG
+   ============================================= */
+const TZ = 'America/Lima';
+
+// Hit zones: [maxSeconds, label, cssClass, chipColor, emoji]
+// Based on inhalation research:
+//   < 3s  → Suave (light, casual)
+//   3-6s  → Estándar (typical productive hit)
+//   6-10s → Profundo (deep lung hold)
+//   10s+  → Máximo / Danger zone — vibration
+const ZONES = [
+  { max:3,        label:'Hit suave',    cls:'z-green',  color:'#4caf50', border:'#4caf50', emoji:'🟢' },
+  { max:6,        label:'Hit estándar', cls:'z-orange', color:'#ff9800', border:'#fb8c00', emoji:'🟡' },
+  { max:10,       label:'Hit profundo', cls:'z-red',    color:'#ef5350', border:'#e53935', emoji:'🔴' },
+  { max:Infinity, label:'¡HIT MÁXIMO!', cls:'z-red',    color:'#b71c1c', border:'#b71c1c', emoji:'💀' },
+];
+
+const MOTIV = [
+  { max:20,       msg:'🌿 Recién vapaste...' },
+  { max:60,       msg:'🍃 Tomando tu tiempo, tranquilo.' },
+  { max:120,      msg:'💚 Buen intervalo, sigue así.' },
+  { max:240,      msg:'✨ ¡Excelente moderación, crack!' },
+  { max:480,      msg:'🌱 Tu cuerpo te lo agradece.' },
+  { max:720,      msg:'🏅 ¡Casi medio día limpio!' },
+  { max:1440,     msg:'🏆 ¡Un día completo, bestia!' },
+  { max:Infinity, msg:'🦁 ¡Leyenda viva del 420!' },
+];
+
+/* =============================================
+   PERU TIME UTILS
+   ============================================= */
+function peruNow() {
+  // Returns a Date object adjusted to Peru local time
+  const s = new Date().toLocaleString('en-US', { timeZone: TZ });
+  return new Date(s);
+}
+
+function toPeruISO(date) {
+  // Convert a Date to ISO string as if it's Peru time (for storage keys)
+  const d = date || peruNow();
+  return d.toISOString();
+}
+
+function todayKey() {
+  const d = peruNow();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function dateKey(y, m, day) {
+  return `${y}-${pad(m+1)}-${pad(day)}`;
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function formatTime(date) {
+  const d = (typeof date === 'string') ? new Date(date) : date;
+  // Show as Peru local time
+  return d.toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit', timeZone: TZ });
+}
+
+/* =============================================
+   STORAGE
+   ============================================= */
+const STORE_KEY  = 'mj_data';
+const ACTIVE_KEY = 'mj_active';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+
+function loadActive() {
+  try { return JSON.parse(localStorage.getItem(ACTIVE_KEY)); }
+  catch { return null; }
+}
+
+function saveActive(s) {
+  if (s) localStorage.setItem(ACTIVE_KEY, JSON.stringify(s));
+  else localStorage.removeItem(ACTIVE_KEY);
+}
+
+/* =============================================
+   STATE
+   ============================================= */
+let active = null;       // active session object
+let pressing = false;    // is hit button held
+let pressStart = 0;      // timestamp of press start
+let pressTimer = null;   // interval for live timer
+let vibDone = false;     // vibrated at 10s?
+let calY, calM;          // calendar nav state
+let modalOpen = false;
+
+/* =============================================
+   ZONE HELPER
+   ============================================= */
+function getZone(secs) {
+  return ZONES.find(z => secs < z.max) || ZONES[ZONES.length-1];
+}
+
+/* =============================================
+   INIT
+   ============================================= */
+function init() {
+  active = loadActive();
+  const now = peruNow();
+  calY = now.getFullYear();
+  calM = now.getMonth();
+
+  // Events
+  document.getElementById('fab').addEventListener('click', openModal);
+  document.getElementById('btn-min').addEventListener('click', closeModal);
+  document.getElementById('btn-end').addEventListener('click', endSession);
+  document.getElementById('cal-prev').addEventListener('click', () => navCal(-1));
+  document.getElementById('cal-next').addEventListener('click', () => navCal(1));
+  setupHitBtn();
+
+  // Ticks
+  setInterval(tickClock, 1000);
+  setInterval(tickLastHit, 1000);
+  if (modalOpen || active) setInterval(tickModal, 1000);
+
+  renderAll();
+
+  if (active) {
+    updateFabState();
+    openModal(false);
+  }
+}
+
+/* =============================================
+   RENDER ALL
+   ============================================= */
+function renderAll() {
+  tickClock();
+  renderStats();
+  tickLastHit();
+  renderCal();
+  renderSessions();
+  updateFabState();
+}
+
+/* =============================================
+   CLOCK
+   ============================================= */
+function tickClock() {
+  const t = peruNow().toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  document.getElementById('clock').textContent = '🕐 ' + t;
+
+  const d = peruNow();
+  const lbl = d.toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('today-lbl').textContent = 'HOY · ' + lbl.toUpperCase();
+}
+
+/* =============================================
+   STATS
+   ============================================= */
+function renderStats() {
+  const data = loadData();
+  const key = todayKey();
+  const todaySessions = data[key]?.sessions || [];
+
+  let sesCnt = todaySessions.length;
+  let hits = 0, secs = 0;
+
+  todaySessions.forEach(s => {
+    (s.hits||[]).forEach(h => { hits++; secs += h.dur || 0; });
+  });
+
+  if (active) {
+    sesCnt++;
+    (active.hits||[]).forEach(h => { hits++; secs += h.dur || 0; });
+  }
+
+  document.getElementById('s-ses').textContent  = sesCnt;
+  document.getElementById('s-hits').textContent = hits;
+  document.getElementById('s-sec').textContent  = Math.round(secs) + 's';
+}
+
+/* =============================================
+   LAST HIT TIMER
+   ============================================= */
+function tickLastHit() {
+  let lastTs = findLastHitTs();
+
+  // If currently pressing, the "hit" started now
+  if (pressing && pressStart) {
+    lastTs = Math.max(lastTs || 0, pressStart);
+  }
+
+  if (!lastTs) {
+    document.getElementById('lhit-time').textContent = '---';
+    document.getElementById('lhit-msg').textContent  = 'Registra tu primera sesión 🌱';
+    return;
+  }
+
+  const diffMs  = Date.now() - lastTs;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffH   = Math.floor(diffMin / 60);
+
+  let timeStr;
+  if (diffSec < 60)      timeStr = diffSec + 's';
+  else if (diffMin < 60) timeStr = diffMin + 'm ' + (diffSec % 60) + 's';
+  else                   timeStr = diffH + 'h ' + (diffMin % 60) + 'm';
+
+  document.getElementById('lhit-time').textContent = timeStr;
+
+  const msg = MOTIV.find(m => diffMin < m.max)?.msg || MOTIV[MOTIV.length-1].msg;
+  document.getElementById('lhit-msg').textContent  = msg;
+}
+
+function findLastHitTs() {
+  let ts = null;
+
+  // Check active session
+  if (active?.hits?.length) {
+    const last = active.hits[active.hits.length-1];
+    const t = new Date(last.ts).getTime();
+    if (!ts || t > ts) ts = t;
+  }
+
+  // Check stored sessions today
+  const data = loadData();
+  const key = todayKey();
+  (data[key]?.sessions||[]).forEach(s => {
+    (s.hits||[]).forEach(h => {
+      const t = new Date(h.ts).getTime();
+      if (!ts || t > ts) ts = t;
+    });
+  });
+
+  return ts;
+}
+
+/* =============================================
+   CALENDAR
+   ============================================= */
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function renderCal() {
+  document.getElementById('cal-month').textContent = MONTHS[calM] + ' ' + calY;
+
+  const data     = loadData();
+  const todayStr = todayKey();
+  const grid     = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const firstDow   = new Date(calY, calM, 1).getDay();
+  const daysInMon  = new Date(calY, calM+1, 0).getDate();
+
+  for (let i = 0; i < firstDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'cday empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMon; d++) {
+    const key = dateKey(calY, calM, d);
+    let hits  = 0;
+
+    (data[key]?.sessions||[]).forEach(s => {
+      hits += (s.hits||[]).length;
+    });
+    if (key === todayStr && active) {
+      hits += (active.hits||[]).length;
+    }
+
+    const el = document.createElement('div');
+    el.textContent = d;
+    el.className   = 'cday';
+    if (key === todayStr) el.classList.add('today');
+    if (hits > 0  && hits <= 5)  el.classList.add('d1');
+    if (hits > 5  && hits <= 12) el.classList.add('d2');
+    if (hits > 12 && hits <= 20) el.classList.add('d3');
+    if (hits > 20)               el.classList.add('d4');
+    if (hits > 0) {
+      const dot = document.createElement('div');
+      dot.className = 'pdot';
+      el.appendChild(dot);
+    }
+    el.addEventListener('click', () => showDayDetail(key, data[key], hits));
+    grid.appendChild(el);
+  }
+}
+
+function showDayDetail(key, dayData, totalHits) {
+  const det = document.getElementById('day-detail');
+  let sessions = dayData?.sessions || [];
+
+  const isToday = key === todayKey();
+  if (isToday && active) sessions = [...sessions, { ...active, _live:true }];
+
+  if (!sessions.length) {
+    det.innerHTML = `<div style="color:var(--muted);text-align:center">Sin datos para ${key}</div>`;
+    det.classList.add('on');
+    return;
+  }
+
+  let totalS = 0;
+  sessions.forEach(s => { (s.hits||[]).forEach(h => totalS += h.dur||0); });
+
+  let html = `<div style="color:var(--green);font-weight:800;font-size:13px;margin-bottom:8px">${key}</div>
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:8px">
+      <strong>${totalHits}</strong> caladas · <strong>${Math.round(totalS)}s</strong> · <strong>${sessions.length}</strong> sesión(es)
+    </div>`;
+
+  sessions.forEach((s, i) => {
+    const sHits = s.hits||[];
+    const sSec  = sHits.reduce((a,h) => a + (h.dur||0), 0);
+    html += `<div class="dd-row">
+      <span style="color:var(--txt2);font-weight:600">${s._live ? '🟢 Activa' : 'Sesión '+(i+1)}</span>
+      <span style="color:var(--muted);font-size:11px">${formatTime(s.startTime)}</span>
+      <span style="color:var(--muted);font-size:11px;width:100%">${sHits.length} caladas · ${Math.round(sSec)}s</span>
+    </div>`;
+  });
+
+  det.innerHTML = html;
+  det.classList.add('on');
+}
+
+function navCal(dir) {
+  calM += dir;
+  if (calM > 11) { calM = 0; calY++; }
+  if (calM < 0)  { calM = 11; calY--; }
+  document.getElementById('day-detail').classList.remove('on');
+  renderCal();
+}
+
+/* =============================================
+   SESSIONS LIST
+   ============================================= */
+function renderSessions() {
+  const data   = loadData();
+  const key    = todayKey();
+  let sessions = [...(data[key]?.sessions||[])];
+  if (active) sessions = [...sessions, { ...active, _live:true }];
+
+  const list = document.getElementById('ses-list');
+  if (!sessions.length) {
+    list.innerHTML = '<div class="empty-state">Sin sesiones aún...</div>';
+    return;
+  }
+
+  list.innerHTML = sessions.slice().reverse().map((s, ri) => {
+    const idx   = sessions.length - ri;
+    const hits  = s.hits||[];
+    const secs  = hits.reduce((a,h) => a + (h.dur||0), 0);
+    const chips = hits.slice(-6).map(h => {
+      const z = getZone(h.dur||0);
+      return `<span class="chip" style="color:${z.color};border-color:${z.border}">${z.emoji} ${Math.round(h.dur||0)}s</span>`;
+    }).join('');
+    const more = hits.length > 6 ? `<span style="font-size:11px;color:var(--muted)"> +${hits.length-6}</span>` : '';
+
+    return `<div class="s-item">
+      <div class="s-row">
+        <span class="s-name">${s._live ? '🟢 Activa' : 'Sesión '+idx}</span>
+        <span class="s-time-tag">${formatTime(s.startTime)}</span>
+      </div>
+      <div class="s-info">${hits.length} caladas · ${Math.round(secs)}s total</div>
+      ${hits.length ? `<div class="chips-row mt4">${chips}${more}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* =============================================
+   MODAL
+   ============================================= */
+function openModal(startNew = true) {
+  if (startNew === true && !active) {
+    active = { id: Date.now(), startTime: peruNow().toISOString(), hits: [] };
+    saveActive(active);
+    updateFabState();
+  }
+  modalOpen = true;
+  document.getElementById('overlay').classList.add('on');
+  updateModal();
+  if (!window._modalTick) window._modalTick = setInterval(updateModal, 1000);
+}
+
+function closeModal() {
+  modalOpen = false;
+  document.getElementById('overlay').classList.remove('on');
+}
+
+function endSession() {
+  if (!active) { closeModal(); return; }
+
+  if (active.hits.length > 0) {
+    const data = loadData();
+    const key  = todayKey();
+    if (!data[key]) data[key] = { sessions: [] };
+    data[key].sessions.push({
+      id:        active.id,
+      startTime: active.startTime,
+      endTime:   peruNow().toISOString(),
+      hits:      active.hits,
+    });
+    saveData(data);
+  }
+
+  active = null;
+  saveActive(null);
+  if (window._modalTick) { clearInterval(window._modalTick); window._modalTick = null; }
+  closeModal();
+  renderAll();
+}
+
+function updateModal() {
+  if (!active) return;
+
+  const hits = active.hits||[];
+  const secs = hits.reduce((a,h) => a + (h.dur||0), 0);
+
+  document.getElementById('m-sub').textContent  = 'Iniciada a las ' + formatTime(active.startTime);
+  document.getElementById('m-hits').textContent = hits.length;
+  document.getElementById('m-sec').textContent  = Math.round(secs) + 's';
+
+  const now  = Date.now();
+  const durMs = now - new Date(active.startTime).getTime();
+  const durM  = Math.floor(durMs / 60000);
+  document.getElementById('m-dur').textContent  = durM + 'm';
+
+  renderModalChips(hits);
+}
+
+function renderModalChips(hits) {
+  const el = document.getElementById('hits-chips');
+  if (!hits.length) {
+    el.innerHTML = '<div class="empty-hint">Presiona el botón para registrar una calada 💨</div>';
+    return;
+  }
+  el.innerHTML = hits.map(h => {
+    const z = getZone(h.dur||0);
+    return `<span class="chip" style="color:${z.color};border-color:${z.border}">${z.emoji} ${Math.round(h.dur||0)}s</span>`;
+  }).join('');
+}
+
+/* =============================================
+   HIT BUTTON
+   ============================================= */
+function setupHitBtn() {
+  const btn = document.getElementById('hit-btn');
+
+  function onPressStart(e) {
+    e.preventDefault();
+    if (pressing) return;
+    pressing   = true;
+    pressStart = Date.now();
+    vibDone    = false;
+    btn.classList.add('pressing', 'z-green');
+
+    // Ripple effect
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.cssText = `width:60px;height:60px;left:${btn.clientWidth/2-30}px;top:${btn.clientHeight/2-30}px`;
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+
+    // Start timer
+    pressTimer = setInterval(() => {
+      const elapsedMs = Date.now() - pressStart;
+      const sec       = elapsedMs / 1000;
+      const zone      = getZone(sec);
+
+      // Update button look
+      btn.className = 'hit-btn pressing ' + zone.cls;
+
+      // Update display
+      document.getElementById('hit-num').textContent  = sec.toFixed(1) + 's';
+      document.getElementById('hit-zone').textContent = zone.label;
+
+      // Vibration at 10s
+      if (sec >= 10 && !vibDone) {
+        vibDone = true;
+        try { navigator.vibrate && navigator.vibrate([200,100,200,100,300]); } catch(e){}
+        const w = document.getElementById('vib-warn');
+        w.classList.add('on');
+        setTimeout(() => w.classList.remove('on'), 2500);
+      }
+    }, 50);
+  }
+
+  function onPressEnd(e) {
+    e.preventDefault();
+    if (!pressing) return;
+    pressing = false;
+    clearInterval(pressTimer); pressTimer = null;
+
+    const durMs = Date.now() - pressStart;
+    const dur   = durMs / 1000;
+
+    // Ignore accidental taps under 300ms
+    if (dur >= 0.3) {
+      if (!active) {
+        active = { id: Date.now(), startTime: peruNow().toISOString(), hits: [] };
+      }
+      active.hits.push({ ts: peruNow().toISOString(), dur });
+      saveActive(active);
+      updateFabState();
+      updateModal();
+      renderStats();
+      renderSessions();
+      renderCal();
+    }
+
+    // Reset button
+    setTimeout(() => {
+      btn.className = 'hit-btn z-green';
+      document.getElementById('hit-num').textContent  = '💨';
+      document.getElementById('hit-zone').textContent = 'Mantén para vapear';
+      document.getElementById('hit-hint').textContent = '';
+      btn.classList.remove('pressing');
+    }, 400);
+  }
+
+  // Touch
+  btn.addEventListener('touchstart', onPressStart, { passive:false });
+  btn.addEventListener('touchend',   onPressEnd,   { passive:false });
+  btn.addEventListener('touchcancel',onPressEnd,   { passive:false });
+
+  // Mouse (desktop)
+  btn.addEventListener('mousedown',  onPressStart);
+  btn.addEventListener('mouseup',    onPressEnd);
+  btn.addEventListener('mouseleave', (e) => { if (pressing) onPressEnd(e); });
+}
+
+/* =============================================
+   FAB STATE
+   ============================================= */
+function updateFabState() {
+  const fab = document.getElementById('fab');
+  if (active) fab.classList.add('has-session');
+  else        fab.classList.remove('has-session');
+}
+
+/* =============================================
+   START
+   ============================================= */
+init();
+</script>
+</body>
+</html>
